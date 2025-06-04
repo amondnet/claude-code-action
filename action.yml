@@ -120,7 +120,7 @@ runs:
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
-      uses: grll/claude-code-base-action@9f0fa5eeca1de34e9be1acf05f244e22e4527ca7 # Latest commit from fork
+      uses: amondnet/claude-code-base-action@4e4374f9963c995227fd89fd36dde05bdf19598a # Latest commit from fork
       with:
         prompt_file: ${{ env.PROMPT_FILE }}
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
