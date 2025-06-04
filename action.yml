@@ -130,7 +130,7 @@ runs:
       if: steps.prepare.outputs.contains_trigger == 'true'
       uses: amondnet/claude-code-base-action@8a95baa73eac7285c83bca97570eefaaa1f1c8c3 # Latest commit from fork
       with:
-        prompt_file: ${{ env.PROMPT_FILE }}
+        prompt_file: ${{ inputs.prompt_file }}
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
         disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
