@@ -81,6 +81,14 @@ inputs:
     description: "Path to a file containing the prompt to send to Claude Code (mutually exclusive with prompt)"
     required: false
     default: "/tmp/claude-prompts/claude-prompt.txt"
+  pipe_path:
+    description: "Path to the pipe file for Claude Code execution (optional, used for custom setups)"
+    required: false
+    default: "/tmp/claude_prompt_pipe"
+  execution_file:
+    description: "Path to the JSON file where Claude Code execution log will be saved"
+    required: false
+    default: "/tmp/claude-execution-output.json"
 
 outputs:
   execution_file:
@@ -120,7 +128,7 @@ runs:
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
-      uses: amondnet/claude-code-base-action@4e4374f9963c995227fd89fd36dde05bdf19598a # Latest commit from fork
+      uses: amondnet/claude-code-base-action@8a95baa73eac7285c83bca97570eefaaa1f1c8c3 # Latest commit from fork
       with:
         prompt_file: ${{ env.PROMPT_FILE }}
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
@@ -135,6 +143,8 @@ runs:
         claude_access_token: ${{ inputs.claude_access_token }}
         claude_refresh_token: ${{ inputs.claude_refresh_token }}
         claude_expires_at: ${{ inputs.claude_expires_at }}
+        pipe_path: ${{ inputs.pipe_path }}
+        execution_file: ${{ inputs.execution_file }}
       env:
         # Model configuration
         ANTHROPIC_MODEL: ${{ inputs.model || inputs.anthropic_model }}
@@ -160,8 +170,6 @@ runs:
         VERTEX_REGION_CLAUDE_3_5_HAIKU: ${{ env.VERTEX_REGION_CLAUDE_3_5_HAIKU }}
         VERTEX_REGION_CLAUDE_3_5_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_5_SONNET }}
         VERTEX_REGION_CLAUDE_3_7_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_7_SONNET }}
-
-        PROMPT_FILE: ${{ inputs.prompt_file }}
 
     - name: Update comment with job link
       if: steps.prepare.outputs.contains_trigger == 'true' && steps.prepare.outputs.claude_comment_id && always()
