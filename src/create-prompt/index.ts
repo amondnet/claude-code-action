@@ -661,7 +661,7 @@ export async function createPrompt(
     console.log("=======================");
 
     // Write the prompt file
-    await writeFile("/tmp/claude-prompts/claude-prompt.txt", promptContent);
+    await writeFile(process.env.PROMPT_FILE ?? "/tmp/claude-prompts/claude-prompt.txt", promptContent);
 
     // Set allowed tools
     const allAllowedTools = buildAllowedToolsString(

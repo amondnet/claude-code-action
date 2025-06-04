@@ -77,6 +77,11 @@ inputs:
     required: false
     default: "30"
 
+  prompt_file:
+    description: "Path to a file containing the prompt to send to Claude Code (mutually exclusive with prompt)"
+    required: false
+    default: "/tmp/claude-prompts/claude-prompt.txt"
+
 outputs:
   execution_file:
     description: "Path to the Claude Code execution output file"
@@ -110,13 +115,14 @@ runs:
         DIRECT_PROMPT: ${{ inputs.direct_prompt }}
         OVERRIDE_GITHUB_TOKEN: ${{ inputs.github_token }}
         GITHUB_RUN_ID: ${{ github.run_id }}
+        PROMPT_FILE: ${{ inputs.prompt_file }}
 
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
       uses: grll/claude-code-base-action@9f0fa5eeca1de34e9be1acf05f244e22e4527ca7 # Latest commit from fork
       with:
-        prompt_file: /tmp/claude-prompts/claude-prompt.txt
+        prompt_file: ${{ env.PROMPT_FILE }}
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
         disallowed_tools: ${{ env.DISALLOWED_TOOLS }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
@@ -154,6 +160,8 @@ runs:
         VERTEX_REGION_CLAUDE_3_5_HAIKU: ${{ env.VERTEX_REGION_CLAUDE_3_5_HAIKU }}
         VERTEX_REGION_CLAUDE_3_5_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_5_SONNET }}
         VERTEX_REGION_CLAUDE_3_7_SONNET: ${{ env.VERTEX_REGION_CLAUDE_3_7_SONNET }}
+
+        PROMPT_FILE: ${{ inputs.prompt_file }}
 
     - name: Update comment with job link
       if: steps.prepare.outputs.contains_trigger == 'true' && steps.prepare.outputs.claude_comment_id && always()
