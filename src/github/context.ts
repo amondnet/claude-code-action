@@ -29,11 +29,13 @@ export type ParsedGitHubContext = {
   inputs: {
     triggerPhrase: string;
     assigneeTrigger: string;
+    labelTrigger: string;
     allowedTools: string[];
     disallowedTools: string[];
     customInstructions: string;
     directPrompt: string;
     baseBranch?: string;
+    branchPrefix: string;
   };
 };
 
@@ -53,11 +55,13 @@ export function parseGitHubContext(): ParsedGitHubContext {
     inputs: {
       triggerPhrase: process.env.TRIGGER_PHRASE ?? "@claude",
       assigneeTrigger: process.env.ASSIGNEE_TRIGGER ?? "",
+      labelTrigger: process.env.LABEL_TRIGGER ?? "",
       allowedTools: parseMultilineInput(process.env.ALLOWED_TOOLS ?? ""),
       disallowedTools: parseMultilineInput(process.env.DISALLOWED_TOOLS ?? ""),
       customInstructions: process.env.CUSTOM_INSTRUCTIONS ?? "",
       directPrompt: process.env.DIRECT_PROMPT ?? "",
       baseBranch: process.env.BASE_BRANCH,
+      branchPrefix: process.env.BRANCH_PREFIX ?? "claude/",
     },
   };
 
