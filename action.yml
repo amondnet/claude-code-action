@@ -136,7 +136,7 @@ runs:
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
-      uses: amondnet/claude-code-base-action@5da7dc079f6d3b9580687b78a14a5ad2466bb7a1 # v0.0.27
+      uses: amondnet/claude-code-base-action@9cca189e706e0584cd3e5fcb0a34531ea4715361 # v0.0.27
       with:
         prompt_file: ${{ runner.temp }}/claude-prompts/claude-prompt.txt
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
