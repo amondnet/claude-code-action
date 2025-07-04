@@ -36,6 +36,8 @@ export type ParsedGitHubContext = {
     directPrompt: string;
     baseBranch?: string;
     branchPrefix: string;
+    useStickyComment: boolean;
+    additionalPermissions: Map<string, string>;
   };
 };
 
@@ -62,6 +64,10 @@ export function parseGitHubContext(): ParsedGitHubContext {
       directPrompt: process.env.DIRECT_PROMPT ?? "",
       baseBranch: process.env.BASE_BRANCH,
       branchPrefix: process.env.BRANCH_PREFIX ?? "claude/",
+      useStickyComment: process.env.USE_STICKY_COMMENT === "true",
+      additionalPermissions: parseAdditionalPermissions(
+        process.env.ADDITIONAL_PERMISSIONS ?? "",
+      ),
     },
   };
 
@@ -121,6 +127,25 @@ export function parseMultilineInput(s: string): string[] {
     .map((tool) => tool.replace(/#.+$/, ""))
     .map((tool) => tool.trim())
     .filter((tool) => tool.length > 0);
+}
+
+export function parseAdditionalPermissions(s: string): Map<string, string> {
+  const permissions = new Map<string, string>();
+  if (!s || !s.trim()) {
+    return permissions;
+  }
+
+  const lines = s.trim().split("\n");
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (trimmedLine) {
+      const [key, value] = trimmedLine.split(":").map((part) => part.trim());
+      if (key && value) {
+        permissions.set(key, value);
+      }
+    }
+  }
+  return permissions;
 }
 
 export function isIssuesEvent(
