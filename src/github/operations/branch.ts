@@ -9,9 +9,10 @@
 import { $ } from "bun";
 import * as core from "@actions/core";
 import type { ParsedGitHubContext } from "../context";
-import type { GitHubPullRequest } from "../types";
+import type { GitHubPullRequest, GitHubIssue } from "../types";
 import type { Octokits } from "../api/client";
 import type { FetchDataResult } from "../data/fetcher";
+import { CREATE_LINKED_BRANCH_MUTATION } from "../api/queries/github";
 
 export type BranchInfo = {
   baseBranch: string;
@@ -122,16 +123,54 @@ export async function setupBranch(
       };
     }
 
-    // For non-signing case, create and checkout the branch locally only
-    console.log(
-      `Creating local branch ${newBranch} for ${entityType} #${entityNumber} from source branch: ${sourceBranch}...`,
-    );
+    // For non-signing case, handle issue branch creation differently
+    if (!isPR) {
+      // For issues, try to use createLinkedBranch mutation to link the branch
+      const issueData = githubData.contextData as GitHubIssue;
+      
+      try {
+        console.log(`Creating linked branch for issue #${entityNumber}...`);
+        
+        // Create branch on GitHub and link it to the issue
+        await octokits.graphql<{
+          createLinkedBranch: {
+            linkedBranch: {
+              id: string;
+              ref: {
+                name: string;
+                prefix: string;
+              };
+            };
+          };
+        }>(CREATE_LINKED_BRANCH_MUTATION, {
+          issueId: issueData.id,
+          oid: currentSHA,
+          name: newBranch,
+        });
 
-    // Create and checkout the new branch locally
-    await $`git checkout -b ${newBranch}`;
+        console.log(`Successfully created linked branch: ${newBranch}`);
+        
+        // Fetch and checkout the branch
+        await $`git fetch origin --depth=1 ${newBranch}`;
+        await $`git checkout ${newBranch}`;
+        
+      } catch (graphqlError) {
+        console.warn(`Failed to create linked branch via GraphQL, falling back to local branch creation:`, graphqlError);
+        
+        // Fallback to local branch creation
+        await $`git checkout -b ${newBranch}`;
+      }
+    } else {
+      // For PRs, just create and checkout the branch locally
+      console.log(
+        `Creating local branch ${newBranch} for ${entityType} #${entityNumber} from source branch: ${sourceBranch}...`,
+      );
+
+      await $`git checkout -b ${newBranch}`;
+    }
 
     console.log(
-      `Successfully created and checked out local branch: ${newBranch}`,
+      `Successfully created and checked out branch: ${newBranch}`,
     );
 
     // Set outputs for GitHub Actions

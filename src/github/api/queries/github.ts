@@ -78,10 +78,29 @@ export const PR_QUERY = `
   }
 `;
 
+export const CREATE_LINKED_BRANCH_MUTATION = `
+  mutation CreateLinkedBranch($issueId: ID!, $oid: GitObjectID!, $name: String) {
+    createLinkedBranch(input: {
+      issueId: $issueId,
+      oid: $oid,
+      name: $name
+    }) {
+      linkedBranch {
+        id
+        ref {
+          name
+          prefix
+        }
+      }
+    }
+  }
+`;
+
 export const ISSUE_QUERY = `
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
       issue(number: $number) {
+        id
         title
         body
         author {

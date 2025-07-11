@@ -74,6 +74,7 @@ export type GitHubPullRequest = {
 };
 
 export type GitHubIssue = {
+  id: string;
   title: string;
   body: string;
   author: GitHubAuthor;
